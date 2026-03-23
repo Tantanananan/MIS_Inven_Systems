@@ -1,0 +1,56 @@
+-- 1. Setup the Database
+CREATE DATABASE IF NOT EXISTS mis_borrowing_system;
+USE mis_borrowing_system;
+
+-- 2. Items Table (Updated to include 'Archived' status)
+CREATE TABLE items (
+    item_id INT(11) NOT NULL AUTO_INCREMENT,
+    item_name VARCHAR(100) NOT NULL,
+    serial_number VARCHAR(100) DEFAULT NULL,
+    status ENUM('Available', 'Borrowed', 'Defective', 'Lost', 'Archived') DEFAULT 'Available',
+    PRIMARY KEY (item_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 3. Students Table (Updated to include email for reminders)
+CREATE TABLE students (
+    student_id VARCHAR(50) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    course_section VARCHAR(30) NOT NULL,
+    email VARCHAR(100) DEFAULT NULL,
+    PRIMARY KEY (student_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 4. Requests Table (Updated to use student_id instead of borrower_name)
+CREATE TABLE requests (
+    request_id INT(11) NOT NULL AUTO_INCREMENT,
+    student_id VARCHAR(50) NOT NULL,
+    item_id INT(11) NOT NULL,
+    request_status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    request_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (request_id),
+    CONSTRAINT fk_req_student FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    CONSTRAINT fk_req_item FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 5. Transactions Table
+CREATE TABLE transactions (
+    transaction_id INT(11) NOT NULL AUTO_INCREMENT,
+    student_id VARCHAR(50) NOT NULL,
+    item_id INT(11) NOT NULL,
+    transaction_status ENUM('Active', 'Completed') DEFAULT 'Active',
+    borrow_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+    PRIMARY KEY (transaction_id),
+    CONSTRAINT fk_trans_student FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    CONSTRAINT fk_trans_item FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 6. User Table (Updated status to numeric for 1=Active, 0=Archived logic)
+CREATE TABLE user (
+    user_id INT(11) NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    status TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=Active, 0=Archived',
+    PRIMARY KEY (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
