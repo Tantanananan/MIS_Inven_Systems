@@ -1,56 +1,224 @@
--- 1. Setup the Database
-CREATE DATABASE IF NOT EXISTS mis_borrowing_system;
-USE mis_borrowing_system;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Mar 23, 2026 at 02:06 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
--- 2. Items Table (Updated to include 'Archived' status)
-CREATE TABLE items (
-    item_id INT(11) NOT NULL AUTO_INCREMENT,
-    item_name VARCHAR(100) NOT NULL,
-    serial_number VARCHAR(100) DEFAULT NULL,
-    status ENUM('Available', 'Borrowed', 'Defective', 'Lost', 'Archived') DEFAULT 'Available',
-    PRIMARY KEY (item_id)
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `mis_borrowing_system`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `items`
+--
+
+CREATE TABLE `items` (
+  `item_id` int(11) NOT NULL,
+  `item_name` varchar(100) NOT NULL,
+  `serial_number` varchar(100) DEFAULT NULL,
+  `status` enum('Available','Borrowed','Defective','Lost','Archived') NOT NULL DEFAULT 'Available'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 3. Students Table (Updated to include email for reminders)
-CREATE TABLE students (
-    student_id VARCHAR(50) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    course_section VARCHAR(30) NOT NULL,
-    email VARCHAR(100) DEFAULT NULL,
-    PRIMARY KEY (student_id)
+--
+-- Dumping data for table `items`
+--
+
+INSERT INTO `items` (`item_id`, `item_name`, `serial_number`, `status`) VALUES
+(4, 'HP Projector', 'EPSON - 12345', 'Archived'),
+(5, 'Tv5', 'Tv123', 'Borrowed'),
+(6, 'Mouse', 'Samsung 2012', 'Defective'),
+(7, 'Keyboard', 'Logitech 201239', 'Borrowed');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `requests`
+--
+
+CREATE TABLE `requests` (
+  `request_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `student_id` varchar(50) NOT NULL,
+  `request_status` enum('Pending','Approved','Rejected') DEFAULT 'Pending',
+  `request_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 4. Requests Table (Updated to use student_id instead of borrower_name)
-CREATE TABLE requests (
-    request_id INT(11) NOT NULL AUTO_INCREMENT,
-    student_id VARCHAR(50) NOT NULL,
-    item_id INT(11) NOT NULL,
-    request_status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
-    request_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-    PRIMARY KEY (request_id),
-    CONSTRAINT fk_req_student FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    CONSTRAINT fk_req_item FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `students`
+--
+
+CREATE TABLE `students` (
+  `student_id` varchar(50) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `course_section` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 5. Transactions Table
-CREATE TABLE transactions (
-    transaction_id INT(11) NOT NULL AUTO_INCREMENT,
-    student_id VARCHAR(50) NOT NULL,
-    item_id INT(11) NOT NULL,
-    transaction_status ENUM('Active', 'Completed') DEFAULT 'Active',
-    borrow_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-    PRIMARY KEY (transaction_id),
-    CONSTRAINT fk_trans_student FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    CONSTRAINT fk_trans_item FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE
+--
+-- Dumping data for table `students`
+--
+
+INSERT INTO `students` (`student_id`, `full_name`, `email`, `course_section`) VALUES
+('20240157 - C', 'Christian Samonte', NULL, 'BSIS - 2A'),
+('20240614-C', 'SamonigaxRe', 'rkaede201@gmail.com', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transactions`
+--
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL,
+  `student_id` varchar(50) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `transaction_status` enum('Active','Completed') DEFAULT 'Active',
+  `borrow_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 6. User Table (Updated status to numeric for 1=Active, 0=Archived logic)
-CREATE TABLE user (
-    user_id INT(11) NOT NULL AUTO_INCREMENT,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    role VARCHAR(50) NOT NULL,
-    status TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=Active, 0=Archived',
-    PRIMARY KEY (user_id)
+--
+-- Dumping data for table `transactions`
+--
+
+INSERT INTO `transactions` (`transaction_id`, `student_id`, `item_id`, `transaction_status`, `borrow_date`) VALUES
+(1, '20240157 - C', 7, 'Completed', '2026-03-12 07:58:15'),
+(2, '20240157 - C', 7, 'Completed', '2026-03-12 16:30:55'),
+(3, '20240157 - C', 7, 'Completed', '2026-03-12 16:42:08'),
+(4, '20240614-C', 4, 'Completed', '2026-03-12 16:42:40'),
+(5, '20240157 - C', 7, 'Active', '2026-03-13 03:40:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user`
+--
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `status` enum('Active','Archived') DEFAULT 'Active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`user_id`, `username`, `password`, `full_name`, `role`, `status`) VALUES
+(1, 'staff123', '$2y$10$1uO8bsXKc0isITRDp4wgaertOiI9DRealLV56noD7jlrqNTWFJLFq', 'johnbenedict', 'Staff', 'Active'),
+(2, 'Admin123', '$2y$10$EidmxhlOt.cg6BhH/eikA.o2gJQAuABr9/0wrLZqh2k9wyJZN3GOS', 'karltelan', 'Admin', 'Active'),
+(3, 'Student123', '$2y$10$Nd50Q2EUgB/l6394.bNWuuO8QhIBWt1TXOkZsOlj8HYRq0TjurRPm', 'tantan', 'Student', 'Active'),
+(4, 'karttiti', '$2y$10$cROIFfGhiEy8n10QXFOWa.YI6nxwbjG..EotlaacHOzh9HasjJbkO', 'karl', 'Student', 'Active'),
+(5, 'jireh123', '$2y$10$V6Q5iUV76QiDiH1ySGQj8uM53AjEy7mD.l0HN4qmve6yPcRNkN3za', 'johnbenedict', 'Staff', ''),
+(6, 'samonte123', '$2y$10$dr5RIfnSl91vNlKt10AF2.b2uWPtLeZsMFRk5v/XQ01sy5F0hdI4G', 'Christian Samonte', 'Student', ''),
+(7, 'Samoniga123', '$2y$10$nN9kKub3upvYrRJkTLjv..i/EChBv2/QGAd1sUxZuuU5tmVMz1NFi', 'SamonigaxRe', 'Staff', 'Active'),
+(8, 'admin123', '$2y$10$lcCQVLE1i1nq0XKs6phZZe98QJSj2PCzhqdd.WmsHrsLf7SIHXAQ2', 'Telanchgrusah', 'Admin', 'Active'),
+(9, 'dfdfdfdfdfsfss12', '$2y$10$3aALiHkI9ZU75CTmIg2/eOWn8.Clu4Qo0orVQ9agC3Y7fL/nRtD5q', '4443!', 'Admin', 'Active'),
+(10, 'hjgjgfgfgfgf!', '$2y$10$Y.uIbxj8Tu.E8rSLWDPfSObVrWi81S7yhX.vS1fQvDCpUl9Wl0lgC', '5555!', 'Student', 'Active');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `items`
+--
+ALTER TABLE `items`
+  ADD PRIMARY KEY (`item_id`);
+
+--
+-- Indexes for table `requests`
+--
+ALTER TABLE `requests`
+  ADD PRIMARY KEY (`request_id`),
+  ADD KEY `requests_ibfk_1` (`item_id`);
+
+--
+-- Indexes for table `students`
+--
+ALTER TABLE `students`
+  ADD PRIMARY KEY (`student_id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Indexes for table `transactions`
+--
+ALTER TABLE `transactions`
+  ADD PRIMARY KEY (`transaction_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `transactions_ibfk_2` (`item_id`);
+
+--
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`user_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `items`
+--
+ALTER TABLE `items`
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `requests`
+--
+ALTER TABLE `requests`
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `transactions`
+--
+ALTER TABLE `transactions`
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `requests`
+--
+ALTER TABLE `requests`
+  ADD CONSTRAINT `requests_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `items` (`item_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `transactions`
+--
+ALTER TABLE `transactions`
+  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `items` (`item_id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
