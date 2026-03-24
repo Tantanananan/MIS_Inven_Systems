@@ -4,7 +4,7 @@ session_start();
 
 // Security check: Only Admin and Staff can process requests
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Staff' && $_SESSION['role'] !== 'Admin')) {
-    header("Location: login.php");
+    header("Location: ../PAGES/login.php");
     exit();
 }
 
@@ -31,16 +31,15 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
             $item = $item_stmt->get_result()->fetch_assoc();
 
             if ($item && $item['status'] === 'Available') {
-                // Start a transaction to ensure all 3 updates happen together securely
-                $mysql->begin_transaction();
-
                 try {
+                    $mysql->begin_transaction();
+
                     // Update Request Status
                     $upd_req = $mysql->prepare("UPDATE requests SET request_status = 'Approved' WHERE request_id = ?");
                     $upd_req->bind_param("i", $request_id);
                     $upd_req->execute();
 
-                    // Update Item Status
+                    // Update Item Status to Borrowed
                     $upd_item = $mysql->prepare("UPDATE items SET status = 'Borrowed' WHERE item_id = ?");
                     $upd_item->bind_param("s", $item_id);
                     $upd_item->execute();
@@ -51,17 +50,17 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                     $ins_trans->execute();
 
                     $mysql->commit();
-                    header("Location: requests.php?status=approved");
+                    header("Location: ../MODULES/requests.php?status=approved");
                     exit();
 
                 } catch (Exception $e) {
                     $mysql->rollback();
-                    header("Location: requests.php?status=error");
+                    header("Location: ../MODULES/requests.php?status=error");
                     exit();
                 }
             } else {
                 // Item is already borrowed, defective, or lost
-                header("Location: requests.php?status=unavailable");
+                header("Location: ../MODULES/requests.php?status=unavailable");
                 exit();
             }
 
@@ -70,16 +69,16 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
             $rej_stmt = $mysql->prepare("UPDATE requests SET request_status = 'Rejected' WHERE request_id = ?");
             $rej_stmt->bind_param("i", $request_id);
             if ($rej_stmt->execute()) {
-                header("Location: requests.php?status=rejected");
+                header("Location: ../MODULES/requests.php?status=rejected");
             } else {
-                header("Location: requests.php?status=error");
+                header("Location: ../MODULES/requests.php?status=error");
             }
             exit();
         }
     }
 }
 
-// Fallback redirect if something goes wrong or URL is manually tampered with
-header("Location: requests.php");
+// Fallback redirect if something goes wrong
+header("Location: ../MODULES/requests.php");
 exit();
 ?>
