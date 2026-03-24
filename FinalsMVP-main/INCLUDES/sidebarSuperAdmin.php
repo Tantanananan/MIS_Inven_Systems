@@ -4,15 +4,13 @@ $user_name = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Super Adm
 ?>
 
 <style>
-    /* Sidebar Styling (Matching your standard green design) */
     .sidebar {
         width: 250px; background-color: #3a5a40; color: white;
         display: flex; flex-direction: column; flex-shrink: 0; min-height: 100vh;
         transition: margin-left 0.3s ease;
+        z-index: 1050;
     }
-    .sidebar.collapsed {
-        margin-left: -250px;
-    }
+    .sidebar.collapsed { margin-left: -250px; }
     
     .sidebar .brand-link {
         padding: 15px 20px; font-size: 1.25rem; color: white;
@@ -20,49 +18,31 @@ $user_name = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Super Adm
     }
     
     .sidebar .user-panel {
-        padding: 15px 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        display: flex;
-        align-items: center;
+        padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center;
     }
 
-    .nav-sidebar { 
-        padding: 10px 0; 
-        list-style: none; 
-        margin: 0; 
-        display: flex; 
-        flex-direction: column; 
-        flex-grow: 1; /* This makes the list take up all vertical space */
-    }
-    .nav-sidebar .nav-link {
-        color: rgba(255,255,255,0.8); padding: 12px 20px; text-decoration: none;
-        display: flex; align-items: center; transition: 0.2s;
-    }
+    .nav-sidebar { padding: 10px 0; list-style: none; margin: 0; display: flex; flex-direction: column; flex-grow: 1; }
+    .nav-sidebar .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; text-decoration: none; display: flex; align-items: center; transition: 0.2s; }
     .nav-sidebar .nav-link:hover { color: white; background-color: rgba(255,255,255,0.1); }
     .nav-sidebar .nav-link.active { background-color: #007bff; color: white; border-radius: 0; }
     .nav-sidebar .nav-link i { margin-right: 15px; width: 20px; text-align: center; }
 
     @media (max-width: 768px) {
-        .sidebar {
-            position: absolute;
-            z-index: 1050;
-            margin-left: -250px;
-        }
-        .sidebar.show-mobile {
-            margin-left: 0;
-        }
+        .sidebar { position: fixed; left: -250px; margin-left: 0 !important; }
+        .sidebar.show-mobile { left: 0; }
     }
 </style>
 
 <aside class="sidebar shadow" id="mainSidebar">
-    <a href="superAdminDashboard.php" class="brand-link">
+    <a href="../PAGES/superAdminDashboard.php" class="brand-link">
         <span class="fw-light"><strong>EQUIP</strong>TRACK</span>
     </a>
 
     <div class="user-panel">
-        <i class="bi bi-shield-lock-fill text-warning me-3" style="font-size: 2.2rem;"></i>
+        <i class="bi bi-shield-fill-check text-white me-3" style="font-size: 2.2rem;"></i>
         <div class="overflow-hidden">
-            <small class="text-white-50 d-block" style="font-size: 0.75rem; line-height: 1;">Super Admin</small>
+            <small class="text-white-50 d-block" style="font-size: 0.75rem; line-height: 1;">Master Control,</small>
             <span class="text-white fw-bold text-truncate d-block" style="max-width: 160px;">
                 <?php echo htmlspecialchars($user_name); ?>
             </span>
@@ -71,10 +51,16 @@ $user_name = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Super Adm
 
     <ul class="nav-sidebar mt-2">
         <li>
-            <a href="superAdminDashboard.php" class="nav-link <?php echo ($current_page == 'superAdminDashboard.php') ? 'active' : ''; ?>">
-                <i class="bi bi-person-badge-fill"></i> Manage Admins
+            <a href="../PAGES/superAdminDashboard.php" class="nav-link <?php echo ($current_page == 'superAdminDashboard.php') ? 'active' : ''; ?>">
+                <i class="bi bi-people-fill"></i> Active Admins
             </a>
         </li>
+        <li>
+            <a href="../MODULES/archivedAdmins.php" class="nav-link <?php echo ($current_page == 'archivedAdmins.php') ? 'active' : ''; ?>">
+                <i class="bi bi-archive-fill"></i> Archived Admins
+            </a>
+        </li>
+
          <li class="mt-auto border-top border-secondary">
             <a href="../PAGES/logout.php" class="nav-link" id="sidebarLogout">
                 <i class="bi bi-box-arrow-left"></i> Logout
@@ -82,6 +68,7 @@ $user_name = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Super Adm
         </li>
     </ul>
 </aside>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('mainSidebar');
@@ -110,7 +97,6 @@ $user_name = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Super Adm
             });
         }
 
-        // SWAL Logout
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
