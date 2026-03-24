@@ -17,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $item = $result->fetch_assoc();
 
     if ($item) {
-        // Check if the item is actually available
         if ($item['status'] == 'Available') {
             // 2. Insert the new active transaction
             $insert_stmt = $mysql->prepare("INSERT INTO transactions (student_id, item_id, transaction_status) VALUES (?, ?, 'Active')");
@@ -29,15 +28,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update_stmt->bind_param("i", $item_id);
             $update_stmt->execute();
 
-            // Success! Redirect with success status
-            header("Location: " . $dashboard . "?status=success");
+            // FIXED: Added ../PAGES/ so it routes correctly!
+            header("Location: ../PAGES/" . $dashboard . "?status=success");
         } else {
-            // The item is Borrowed, Defective, or Lost
-            header("Location: " . $dashboard . "?status=unavailable");
+            header("Location: ../PAGES/" . $dashboard . "?status=unavailable");
         }
     } else {
-        // The item doesn't exist in the database at all
-        header("Location: " . $dashboard . "?status=error");
+        header("Location: ../PAGES/" . $dashboard . "?status=error");
     }
     
     exit();
